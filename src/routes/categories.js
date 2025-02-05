@@ -56,7 +56,7 @@ router.delete("/:id", async (req, res) => {
 
     // Exclui a categoria
     const text = "DELETE FROM categories WHERE id = $1 RETURNING *";
-    const values = [id];
+    const values = [Number(id)];
     const deleteResponse = await db.query(text, values);
 
     return res.status(200).json({
