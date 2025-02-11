@@ -1,16 +1,19 @@
-// Importa a classe Pool do módulo 'pg' para gerenciar a conexão com o banco de dados PostgreSQL
+// Carrega variáveis de ambiente do arquivo .env
 require("dotenv").config();
+
+// Importa a classe Pool do módulo 'pg' para gerenciar a conexão com o banco de dados PostgreSQL
 const { Pool } = require("pg");
 
-const { DB_USER, DB_PASSWORD, DB_NAME, DB_POST, DB_PORT } = process.env;
+// Obtém as configurações do banco de dados a partir das variáveis de ambiente
+const { DB_USER, DB_PASSWORD, DB_NAME, DB_HOST, DB_PORT } = process.env;
 
 // Configuração da conexão com o banco de dados PostgreSQL
 const db = new Pool({
-  user: DB_USER, // Nome do usuário do banco de dados
+  user: DB_USER, // Usuário do banco de dados
   password: DB_PASSWORD, // Senha do banco de dados
-  database: DB_NAME, // Nome do banco de dados utilizado
-  host: DB_POST, // Endereço do servidor do banco de dados
-  port: Number(DB_PORT), // Porta padrão do PostgreSQL
+  database: DB_NAME, // Nome do banco de dados
+  host: DB_HOST, // Endereço do servidor do banco de dados
+  port: Number(DB_PORT), // Porta do PostgreSQL (convertida para número)
 });
 
 // Exporta a instância de conexão para ser utilizada em outras partes da aplicação
