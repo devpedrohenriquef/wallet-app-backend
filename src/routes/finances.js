@@ -121,37 +121,57 @@ router.delete("/:id", async (req, res) => {
 
 router.get("/", async (req, res) => {
   try {
+    // Obtém a data dos parâmetros da URL e o e-mail do cabeçalho da requisição
     const { date } = req.query;
     const { email } = req.headers;
 
+    // Valida se a data foi fornecida e se está no formato correto (yyyy-mm-dd)
     if (!date || date.length != 10) {
       return res.status(400).json({
         error: "Date is mandatory and should be in the format yyyy-mm-dd",
       });
     }
 
+    // Valida se o e-mail foi fornecido corretamente (mínimo 5 caracteres e contém "@")
     if (email.length < 5 || !email.includes("@")) {
       return res.status(400).json({ error: "E-mail is invalid." });
     }
 
+    // Consulta o banco de dados para buscar o usuário pelo e-mail
     const userQuery = await db.query(usersQueries.findByEmail(email));
+
+    // Se o usuário não for encontrado, retorna um erro 404
     if (!userQuery.rows[0]) {
       return res.status(404).json({ error: "User does not exist." });
     }
 
+    // Converte a string de data recebida em um objeto Date
     const dateObject = new Date(date);
+
+    // Extrai o ano e o mês da data informada
     const year = dateObject.getFullYear();
-    const month = dateObject.getMonth();
+    const month = dateObject.getMonth(); // Janeiro = 0, Fevereiro = 1, etc.
+
+    // Define o primeiro dia do mês no formato ISO (exemplo: '2025-03-01T00:00:00.000Z')
     const initDate = new Date(year, month, 1).toISOString();
+
+    // Define o último dia do mês no formato de string de data (exemplo: 'Sat Mar 31 2025')
     const finDate = new Date(year, month + 1, 0).toDateString();
 
+    // Query para buscar os registros financeiros do usuário dentro do período selecionado
     const text =
       "SELECT fin.title, fin.value, fin.date, fin.user_id, fin.category_id, cat.name FROM finances as fin JOIN categories as cat ON fin.category_id = cat.id WHERE fin.user_id = $1 AND fin.date BETWEEN $2 AND $3 ORDER BY fin.date ASC ";
+
+    // Parâmetros da consulta: ID do usuário, data inicial e data final
     const values = [userQuery.rows[0].id, initDate, finDate];
+
+    // Executa a query no banco de dados
     const financesQuery = await db.query(text, values);
 
+    // Retorna os registros encontrados no formato JSON
     return res.status(200).json(financesQuery.rows);
   } catch (error) {
+    // Em caso de erro interno, retorna um erro 500 com a mensagem de erro
     return res.status(500).json(error);
   }
 });

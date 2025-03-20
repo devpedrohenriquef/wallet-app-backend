@@ -9,7 +9,7 @@ router.get("/", async (req, res) => {
     const response = await db.query(
       "SELECT * FROM categories ORDER BY name ASC"
     );
-    return res.status(200).json(response.rows);
+    return res.status(200).json(response);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal Server Error" });
