@@ -1,13 +1,22 @@
+require("dotenv").config(); // Carrega as variáveis de ambiente do arquivo .env
 const express = require("express"); // Importa o framework Express
+const cors = require("cors"); // Importa o pacote CORS para permitir requisições de diferentes origens
 const db = require("./db"); // Importa a configuração do banco de dados
 const routesCategories = require("./routes/categories"); // Importa as rotas de categorias
 const routesUser = require("./routes/users"); // Importa as rotas de usuários
 const routesFinances = require("./routes/finances"); // Importa as rotas de finanças
 
 const app = express(); // Inicializa a aplicação Express
+
+app.use(
+  cors({
+    origin: "*", // Permite requisições de qualquer origem (pode ser ajustado para maior segurança)
+  })
+);
+
 app.use(express.json()); // Habilita o uso de JSON no corpo das requisições
 
-const port = 3000; // Define a porta do servidor
+const port = process.env.PORT; // Define a porta do servidor a partir das variáveis de ambiente
 
 // Rota principal da aplicação
 app.get("/", (req, res) => {

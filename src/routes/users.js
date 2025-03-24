@@ -48,7 +48,7 @@ router.post("/", async (req, res) => {
 // Rota para atualizar os dados de um usuário existente
 router.put("/", async (req, res) => {
   try {
-    const oldEmail = req.headers.email; // E-mail do usuário a ser atualizado
+    const oldEmail = req.headers.email; // Obtém o e-mail do usuário a ser atualizado a partir dos headers
     const { name, email } = req.body;
 
     // Validação: O nome deve ter pelo menos 3 caracteres
@@ -58,7 +58,7 @@ router.put("/", async (req, res) => {
         .json({ error: "Name should have more than 3 characters." });
     }
 
-    // Validação: O e-mail deve ter pelo menos 5 caracteres e conter '@'
+    // Validação: O novo e-mail deve ter pelo menos 5 caracteres e conter '@'
     if (email.length < 5 || !email.includes("@")) {
       return res.status(400).json({ error: "E-mail is invalid." });
     }
@@ -75,7 +75,7 @@ router.put("/", async (req, res) => {
       return res.status(404).json({ error: "User does not exist." });
     }
 
-    // Atualiza os dados do usuário
+    // Atualiza os dados do usuário (nome e e-mail)
     const text =
       "UPDATE users SET name =$1, email=$2 WHERE email=$3 RETURNING *";
     const values = [name, email, oldEmail];
@@ -89,9 +89,32 @@ router.put("/", async (req, res) => {
     // Retorna os dados do usuário atualizado
     return res.status(200).json(updateResponse.rows[0]);
   } catch (error) {
-    console.error("Error updating user:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-module.exports = router;
+// Rota para buscar um usuário pelo e-mail
+router.get("/", async (req, res) => {
+  try {
+    const { email } = req.query; // Obtém o e-mail da query string
+
+    // Validação: O e-mail deve ser válido
+    if (!email || email.length < 5 || !email.includes("@")) {
+      return res.status(400).json({ error: "E-mail is invalid." });
+    }
+
+    // Busca o usuário no banco de dados pelo e-mail fornecido
+    const query = usersQueries.findByEmail(email);
+    const userExist = await db.query(query);
+    if (!userExist.rows[0]) {
+      return res.status(404).json({ error: "User does not exist." });
+    }
+
+    // Retorna os dados do usuário encontrado
+    return res.status(200).json(userExist.rows[0]);
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+});
+
+module.exports = router; // Exporta o roteador para ser usado no app principal
