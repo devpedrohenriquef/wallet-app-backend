@@ -3,7 +3,7 @@ require("dotenv").config();
 
 // Importa a classe Pool do módulo 'pg' para gerenciar a conexão com o banco de dados PostgreSQL
 const { Pool } = require("pg");
-const { connectionString } = require("pg/lib/defaults");
+const { connectionString, ssl } = require("pg/lib/defaults");
 
 // Obtém as configurações do banco de dados a partir das variáveis de ambiente
 const { DB_USER, DB_PASSWORD, DB_NAME, DB_HOST, DB_PORT, DB_URL } = process.env;
@@ -13,6 +13,9 @@ const db = new Pool(
   DB_URL
     ? {
         connectionStrin: DB_URL,
+        ssl: {
+          rejectUnauthorized: false,
+        },
       }
     : {
         user: DB_USER, // Usuário do banco de dados
@@ -20,6 +23,9 @@ const db = new Pool(
         database: DB_NAME, // Nome do banco de dados
         host: DB_HOST, // Endereço do servidor do banco de dados
         port: Number(DB_PORT), // Porta do PostgreSQL (convertida para número)
+        ssl: {
+          rejectUnauthorized: false,
+        },
       }
 );
 
